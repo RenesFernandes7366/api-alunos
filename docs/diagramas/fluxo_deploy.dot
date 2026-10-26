@@ -1,7 +1,7 @@
 digraph D {
-  rankdir=LR; pad=0.3;
-  node [shape=box style="rounded,filled" fontname="DejaVu Sans" fontsize=10 fillcolor="#eceff4" color="#4c566a"];
-  edge [color="#5e81ac"];
+  rankdir=LR; pad=0.3; nodesep=0.5; ranksep=0.5;
+  node [shape=box style="rounded,filled" fontname="DejaVu Sans" fontsize=10 fillcolor="#eceff4" color="#4c566a" width=1.9 height=0.75];
+  edge [color="#5e81ac" penwidth=1.3];
   a [label="1. Código local\nPython + FastAPI"];
   b [label="2. Testes\npytest (8 testes)" fillcolor="#e8f5e9"];
   c [label="3. git push\nGitHub"];
@@ -9,5 +9,8 @@ digraph D {
   e [label="5. cloud-init na VM\nclona repo, venv,\nsystemd, nginx" fillcolor="#eaf3fc"];
   f [label="6. API no ar\nhttp://IP/docs" fillcolor="#c8e6c9"];
   g [label="7. smoke_test.sh\ncontra o IP público" fillcolor="#e8f5e9"];
-  a->b->c->d->e->f->g;
+  a->b->c->d;
+  d->e [constraint=false];
+  g->f [dir=back]; f->e [dir=back];
+  {rank=same; a; g} {rank=same; b; f} {rank=same; c; e}
 }
