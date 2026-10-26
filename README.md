@@ -42,7 +42,7 @@ api-alunos/
 │   └── atualizar_vm.sh    # atualiza a API via SSH
 ├── docs/
 │   ├── diagramas/         # arquitetura, modelo ER, fluxos
-│   ├── prints/            # 13 prints (testes locais, API na Azure, portal)
+│   ├── prints/            # 14 prints (testes locais, API na Azure, portal)
 │   ├── Documentacao_API_Escola.docx
 │   └── Documentacao_API_Escola.pdf
 ├── requirements.txt
