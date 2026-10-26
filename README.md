@@ -1,6 +1,10 @@
 # API Escola — Alunos, Cursos e Matrículas
 
-API REST em **Python + FastAPI** com banco de dados **SQLite**, hospedada em uma **máquina virtual Linux na Microsoft Azure** (SKU `Standard_B1s`, Ubuntu 24.04 LTS, região Brazil South).
+API REST em **Python + FastAPI** com banco de dados **SQLite**, hospedada em uma **máquina virtual Linux na Microsoft Azure** (SKU `Standard_B2pts_v2`, Arm64, Ubuntu 24.04 LTS, região Central US).
+
+**API publicada:** http://52.230.164.119/docs
+
+📄 Documentação completa: [Word](docs/Documentacao_API_Escola.docx) · [PDF](docs/Documentacao_API_Escola.pdf)
 
 ![Arquitetura](docs/diagramas/arquitetura.png)
 
@@ -26,16 +30,21 @@ Códigos de resposta: `200` ok · `201` criado · `204` removido · `404` não e
 ```
 api-alunos/
 ├── app/
-│   ├── main.py          # rotas da API (FastAPI)
-│   ├── database.py      # conexão e criação das tabelas SQLite
-│   └── schemas.py       # validação dos dados (Pydantic)
-├── tests/test_api.py    # 8 testes automatizados (pytest)
-├── scripts/smoke_test.sh# teste HTTP de ponta a ponta (local ou na nuvem)
+│   ├── main.py            # rotas da API (FastAPI)
+│   ├── database.py        # conexão e criação das tabelas SQLite
+│   └── schemas.py         # validação dos dados (Pydantic)
+├── tests/test_api.py      # 8 testes automatizados (pytest)
+├── scripts/smoke_test.sh  # teste HTTP de ponta a ponta (local ou na nuvem)
 ├── deploy/
-│   ├── azure_criar_vm.sh# cria toda a infraestrutura na Azure (Azure CLI)
-│   ├── cloud-init.yaml  # configura a VM no primeiro boot
-│   └── atualizar_vm.sh  # atualiza a API após um novo push
-├── docs/                # diagramas e prints de tela
+│   ├── azure_criar_vm.sh  # cria toda a infraestrutura na Azure (Azure CLI)
+│   ├── cloud-init.yaml    # configura a VM no primeiro boot
+│   ├── instalar_na_vm.sh  # instala/atualiza a API na VM (via Run Command)
+│   └── atualizar_vm.sh    # atualiza a API via SSH
+├── docs/
+│   ├── diagramas/         # arquitetura, modelo ER, fluxos
+│   ├── prints/            # 13 prints (testes locais, API na Azure, portal)
+│   ├── Documentacao_API_Escola.docx
+│   └── Documentacao_API_Escola.pdf
 ├── requirements.txt
 └── requirements-dev.txt
 ```
@@ -59,19 +68,44 @@ pytest -v                    # testes automatizados
 
 ## Publicando na Azure
 
-Pré-requisitos: conta Azure e [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) com `az login` feito.
+No portal da Azure, abra o **Cloud Shell** (Bash ou PowerShell) e rode:
 
 ```bash
-./deploy/azure_criar_vm.sh
+git clone https://github.com/RenesFernandes7366/api-alunos.git
+cd api-alunos
+bash -c "LOCATION=centralus SIZE=Standard_B2pts_v2 ./deploy/azure_criar_vm.sh"
 ```
 
-O script cria Resource Group, VM, rede, IP público e libera a porta 80. Na primeira inicialização, o `cloud-init` instala Python, Nginx e Git, clona este repositório, instala as dependências e sobe a API como serviço `systemd`. Depois de ~3 minutos:
+O script confere se o tamanho da VM está liberado na região, cria Resource Group, VM, rede, IP público e NSG e libera a porta 80. Tamanhos Arm (com `p` no nome) usam automaticamente a imagem Ubuntu Arm64.
+
+Para instalar ou atualizar a API dentro da VM (também usado depois de um novo `git push`):
 
 ```bash
-./scripts/smoke_test.sh http://IP-DA-VM
+az vm run-command invoke -g rg-api-escola -n vm-api-escola --command-id RunShellScript \
+  --scripts "@deploy/instalar_na_vm.sh" --query "value[0].message" -o tsv
+```
+
+Validar:
+
+```bash
+curl http://52.230.164.119/health
+bash -c "./scripts/smoke_test.sh http://52.230.164.119"
 ```
 
 Para remover tudo e parar a cobrança: `az group delete --name rg-api-escola --yes`.
+
+## Recursos na Azure
+
+| Recurso         | Valor                                                     |
+|-----------------|-----------------------------------------------------------|
+| Resource Group  | `rg-api-escola`                                           |
+| Região          | Central US                                                |
+| VM / SKU        | `vm-api-escola` – `Standard_B2pts_v2` (2 vCPU, 1 GiB, Arm64) |
+| SO              | Ubuntu 24.04 LTS (`ubuntu-24_04-lts:server-arm64`)        |
+| Disco           | Managed Disk Standard SSD LRS, 30 GiB                     |
+| Rede            | `vm-api-escolaVNET` / `vm-api-escolaSubnet`, IP privado 10.0.0.4 |
+| IP público      | 52.230.164.119                                            |
+| NSG             | `vm-api-escolaNSG` – entrada 22 (SSH) e 80 (HTTP)         |
 
 ## Tecnologias
 
@@ -79,9 +113,9 @@ Para remover tudo e parar a cobrança: `az group delete --name rg-api-escola --y
 |-----------------|---------------------------------------------|
 | Linguagem       | Python 3.12                                 |
 | Framework web   | FastAPI + Uvicorn (ASGI)                    |
-| Validação       | Pydantic v2                                  |
+| Validação       | Pydantic v2                                 |
 | Banco de dados  | SQLite 3 (arquivo `escola.db`)              |
 | Servidor web    | Nginx (proxy reverso)                       |
-| Nuvem           | Azure VM `Standard_B1s`, Ubuntu 24.04 LTS   |
+| Nuvem           | Azure VM `Standard_B2pts_v2`, Ubuntu 24.04 LTS Arm64 |
 | Armazenamento   | Managed Disk Standard SSD LRS, 30 GiB       |
 | Testes          | pytest + httpx                              |
