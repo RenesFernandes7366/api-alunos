@@ -3,7 +3,7 @@ digraph G {
   node [shape=box style="rounded,filled" fontname="DejaVu Sans" fontsize=11 color="#3b4252" penwidth=1.2];
   edge [fontname="DejaVu Sans" fontsize=9 color="#4c566a"];
   user [label="Usuário\n(navegador / curl / app)" fillcolor="#e5e9f0"];
-  gh [label="GitHub\nrepositório público\napi-alunos-cursos" fillcolor="#eceff4" shape=folder];
+  gh [label="GitHub\nrepositório público\napi-alunos" fillcolor="#eceff4" shape=folder];
   subgraph cluster_az { label="Microsoft Azure  •  Região Brazil South (São Paulo)"; fontname="DejaVu Sans Bold"; fontsize=12; style="rounded,filled"; fillcolor="#eaf3fc"; color="#0078d4";
     subgraph cluster_rg { label="Resource Group: rg-api-escola"; style="rounded,dashed"; fillcolor="#f5f9fe"; color="#5e81ac"; fontsize=11;
       ip [label="IP Público\n(Standard, estático)" fillcolor="#ffffff"];

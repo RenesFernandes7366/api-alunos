@@ -24,7 +24,7 @@ Códigos de resposta: `200` ok · `201` criado · `204` removido · `404` não e
 ## Estrutura do projeto
 
 ```
-api-alunos-cursos/
+api-alunos/
 ├── app/
 │   ├── main.py          # rotas da API (FastAPI)
 │   ├── database.py      # conexão e criação das tabelas SQLite
@@ -62,7 +62,7 @@ pytest -v                    # testes automatizados
 Pré-requisitos: conta Azure e [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) com `az login` feito.
 
 ```bash
-./deploy/azure_criar_vm.sh https://github.com/SEU_USUARIO/api-alunos-cursos.git
+./deploy/azure_criar_vm.sh
 ```
 
 O script cria Resource Group, VM, rede, IP público e libera a porta 80. Na primeira inicialização, o `cloud-init` instala Python, Nginx e Git, clona este repositório, instala as dependências e sobe a API como serviço `systemd`. Depois de ~3 minutos:

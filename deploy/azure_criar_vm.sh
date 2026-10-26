@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Cria toda a infraestrutura na Azure e publica a API.
 # Pré-requisitos: Azure CLI instalada e "az login" feito.
-# Uso: ./deploy/azure_criar_vm.sh https://github.com/SEU_USUARIO/api-alunos-cursos.git
+# Uso: ./deploy/azure_criar_vm.sh   (opcional: URL de outro repositório)
 set -euo pipefail
 
-REPO_URL="${1:?Informe a URL do repositório no GitHub}"
+REPO_URL="${1:-https://github.com/RenesFernandes7366/api-alunos.git}"
 RG="rg-api-escola"            # Resource Group
 LOCATION="brazilsouth"         # Região (São Paulo)
 VM="vm-api-escola"
