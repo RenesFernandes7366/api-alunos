@@ -13,8 +13,16 @@ RG="${RG:-rg-api-escola}"                  # Resource Group
 LOCATION="${LOCATION:-brazilsouth}"        # Região (padrão: São Paulo)
 VM="${VM:-vm-api-escola}"
 SIZE="${SIZE:-Standard_B1s}"               # SKU: 1 vCPU, 1 GiB RAM
-IMAGE="Ubuntu2404"                         # Ubuntu Server 24.04 LTS
 ADMIN="azureuser"
+
+# Tamanhos com "p" (ex.: Standard_B2pts_v2) usam processador Arm e precisam da imagem Arm64.
+if [[ "$SIZE" =~ ^Standard_[A-Z][0-9]+[a-z]*p ]]; then
+  IMAGE="${IMAGE:-Canonical:ubuntu-24_04-lts:server-arm64:latest}"   # Ubuntu 24.04 LTS (Arm64)
+  EXTRA_ARGS=(--security-type Standard)
+else
+  IMAGE="${IMAGE:-Ubuntu2404}"                                       # Ubuntu 24.04 LTS (x64)
+  EXTRA_ARGS=()
+fi
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 sed "s|__REPO_URL__|$REPO_URL|" "$DIR/cloud-init.yaml" > /tmp/cloud-init-api-escola.yaml
@@ -33,7 +41,7 @@ mostrar_erro_real() {
   exit 1
 }
 
-echo ">> Região: $LOCATION | Tamanho (SKU): $SIZE"
+echo ">> Região: $LOCATION | Tamanho (SKU): $SIZE | Imagem: $IMAGE"
 echo ">> Verificando se o tamanho $SIZE está disponível em $LOCATION"
 DISP=$(az vm list-skus --location "$LOCATION" --size "$SIZE" --resource-type virtualMachines \
   --query "[?name=='$SIZE'] | [0].{n:name, r:length(restrictions)}" -o tsv 2>/dev/null || true)
@@ -71,6 +79,7 @@ az vm create \
   --storage-sku StandardSSD_LRS \
   --os-disk-size-gb 30 \
   --custom-data /tmp/cloud-init-api-escola.yaml \
+  "${EXTRA_ARGS[@]}" \
   -o table || mostrar_erro_real
 
 echo ">> Liberando a porta 80 (HTTP) no Network Security Group"
