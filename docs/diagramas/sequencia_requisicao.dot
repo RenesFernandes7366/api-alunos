@@ -1,0 +1,13 @@
+digraph S {
+  rankdir=LR; pad=0.3;
+  node [shape=box style="rounded,filled" fontname="DejaVu Sans" fontsize=10 fillcolor="#eceff4"];
+  edge [fontname="DejaVu Sans" fontsize=9];
+  c [label="Cliente"]; n [label="Nginx :80"]; u [label="Uvicorn\n+ FastAPI"]; p [label="Pydantic\n(validação)"]; s [label="SQLite" shape=cylinder fillcolor="#fff9c4"];
+  c -> n [label="1. POST /matriculas"];
+  n -> u [label="2. repassa"];
+  u -> p [label="3. valida JSON"];
+  p -> u [label="422 se inválido" style=dashed color="#bf616a" fontcolor="#bf616a"];
+  u -> s [label="4. SELECT/INSERT"];
+  s -> u [label="5. linha criada" style=dashed];
+  u -> c [label="6. 201 + JSON\n(404/409 em erro)" style=dashed constraint=false];
+}

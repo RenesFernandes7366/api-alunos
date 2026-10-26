@@ -1,0 +1,26 @@
+digraph ER {
+  rankdir=LR; pad=0.3; nodesep=0.8;
+  node [shape=plain fontname="DejaVu Sans" fontsize=11];
+  edge [fontname="DejaVu Sans" fontsize=10 color="#4c566a" arrowhead=none];
+  alunos [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="6" color="#3b4252">
+   <tr><td bgcolor="#5e81ac" colspan="2"><font color="white"><b>alunos</b></font></td></tr>
+   <tr><td align="left" port="pkw"><b>id</b> 🔑</td><td align="left" port="pk">INTEGER PK</td></tr>
+   <tr><td align="left">nome</td><td align="left">TEXT NOT NULL</td></tr>
+   <tr><td align="left">email</td><td align="left">TEXT UNIQUE</td></tr>
+   <tr><td align="left" port="a">data_nascimento</td><td align="left">TEXT (data)</td></tr></table>>];
+  matriculas [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="6" color="#3b4252">
+   <tr><td bgcolor="#a3be8c" colspan="2"><b>matriculas</b></td></tr>
+   <tr><td align="left" port="pkw"><b>id</b> 🔑</td><td align="left" port="pk">INTEGER PK</td></tr>
+   <tr><td align="left" port="fa">aluno_id</td><td align="left">FK → alunos.id</td></tr>
+   <tr><td align="left" port="fc">curso_id</td><td align="left" port="fce">FK → cursos.id</td></tr>
+   <tr><td align="left">data_matricula</td><td align="left">TEXT (data)</td></tr>
+   <tr><td align="left" colspan="2"><i>UNIQUE(aluno_id, curso_id)</i></td></tr></table>>];
+  cursos [label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="6" color="#3b4252">
+   <tr><td bgcolor="#d08770" colspan="2"><font color="white"><b>cursos</b></font></td></tr>
+   <tr><td align="left" port="pkw"><b>id</b> 🔑</td><td align="left" port="pk">INTEGER PK</td></tr>
+   <tr><td align="left">nome</td><td align="left">TEXT UNIQUE</td></tr>
+   <tr><td align="left">descricao</td><td align="left">TEXT</td></tr>
+   <tr><td align="left">carga_horaria</td><td align="left">INTEGER &gt; 0</td></tr></table>>];
+  alunos:pk:e -> matriculas:fa:w [headlabel="N" taillabel="1"];
+  matriculas:fce:e -> cursos:pkw:w [headlabel="1" taillabel="N"];
+}

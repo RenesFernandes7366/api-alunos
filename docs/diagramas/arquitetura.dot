@@ -1,0 +1,27 @@
+digraph G {
+  rankdir=LR; bgcolor="white"; pad=0.3; nodesep=0.5; ranksep=0.7;
+  node [shape=box style="rounded,filled" fontname="DejaVu Sans" fontsize=11 color="#3b4252" penwidth=1.2];
+  edge [fontname="DejaVu Sans" fontsize=9 color="#4c566a"];
+  user [label="Usuário\n(navegador / curl / app)" fillcolor="#e5e9f0"];
+  gh [label="GitHub\nrepositório público\napi-alunos-cursos" fillcolor="#eceff4" shape=folder];
+  subgraph cluster_az { label="Microsoft Azure  •  Região Brazil South (São Paulo)"; fontname="DejaVu Sans Bold"; fontsize=12; style="rounded,filled"; fillcolor="#eaf3fc"; color="#0078d4";
+    subgraph cluster_rg { label="Resource Group: rg-api-escola"; style="rounded,dashed"; fillcolor="#f5f9fe"; color="#5e81ac"; fontsize=11;
+      ip [label="IP Público\n(Standard, estático)" fillcolor="#ffffff"];
+      nsg [label="Network Security Group\nentrada: 22 (SSH), 80 (HTTP)" fillcolor="#fff4e5"];
+      subgraph cluster_vnet { label="VNet 10.0.0.0/16  •  Subnet 10.0.0.0/24"; style="rounded"; fillcolor="#ffffff"; color="#81a1c1"; fontsize=10;
+        subgraph cluster_vm { label="VM vm-api-escola  •  SKU Standard_B1s (1 vCPU, 1 GiB)  •  Ubuntu 24.04 LTS"; style="rounded,filled"; fillcolor="#e8f5e9"; color="#2e7d32"; fontsize=10;
+          nginx [label="Nginx\nproxy reverso :80" fillcolor="#c8e6c9"];
+          uv [label="Uvicorn (systemd)\nFastAPI • Python 3\n127.0.0.1:8000" fillcolor="#c8e6c9"];
+          db [label="SQLite\n/var/lib/api-escola/escola.db" shape=cylinder fillcolor="#fff9c4"];
+        }
+      }
+      disk [label="Managed Disk (SO)\nStandard SSD LRS • 30 GiB" shape=cylinder fillcolor="#ffe0b2"];
+    }
+  }
+  user -> ip [label="HTTP :80"];
+  ip -> nsg -> nginx;
+  nginx -> uv [label="proxy_pass"];
+  uv -> db [label="SQL"];
+  db -> disk [style=dashed label="arquivo gravado no disco"];
+  gh -> uv [style=dashed label="git clone (cloud-init)"];
+}

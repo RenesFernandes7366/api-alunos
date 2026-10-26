@@ -1,0 +1,13 @@
+digraph D {
+  rankdir=LR; pad=0.3;
+  node [shape=box style="rounded,filled" fontname="DejaVu Sans" fontsize=10 fillcolor="#eceff4" color="#4c566a"];
+  edge [color="#5e81ac"];
+  a [label="1. Código local\nPython + FastAPI"];
+  b [label="2. Testes\npytest (8 testes)" fillcolor="#e8f5e9"];
+  c [label="3. git push\nGitHub"];
+  d [label="4. azure_criar_vm.sh\n(Azure CLI)" fillcolor="#eaf3fc"];
+  e [label="5. cloud-init na VM\nclona repo, venv,\nsystemd, nginx" fillcolor="#eaf3fc"];
+  f [label="6. API no ar\nhttp://IP/docs" fillcolor="#c8e6c9"];
+  g [label="7. smoke_test.sh\ncontra o IP público" fillcolor="#e8f5e9"];
+  a->b->c->d->e->f->g;
+}

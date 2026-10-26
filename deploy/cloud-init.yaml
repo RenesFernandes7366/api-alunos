@@ -1,0 +1,53 @@
+#cloud-config
+# Executado automaticamente pela VM na primeira inicialização.
+# O script azure_criar_vm.sh substitui __REPO_URL__ pelo link do seu repositório.
+package_update: true
+packages:
+  - python3-venv
+  - python3-pip
+  - nginx
+  - git
+  - sqlite3
+
+write_files:
+  - path: /etc/systemd/system/api-escola.service
+    content: |
+      [Unit]
+      Description=API Escola (FastAPI + SQLite)
+      After=network.target
+
+      [Service]
+      User=www-data
+      WorkingDirectory=/opt/api-escola
+      Environment=DB_PATH=/var/lib/api-escola/escola.db
+      ExecStart=/opt/api-escola/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
+      Restart=always
+      RestartSec=3
+
+      [Install]
+      WantedBy=multi-user.target
+
+  - path: /etc/nginx/sites-available/api-escola
+    content: |
+      server {
+          listen 80 default_server;
+          server_name _;
+          location / {
+              proxy_pass http://127.0.0.1:8000;
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          }
+      }
+
+runcmd:
+  - git clone __REPO_URL__ /opt/api-escola
+  - python3 -m venv /opt/api-escola/.venv
+  - /opt/api-escola/.venv/bin/pip install -r /opt/api-escola/requirements.txt
+  - mkdir -p /var/lib/api-escola
+  - chown -R www-data:www-data /var/lib/api-escola /opt/api-escola
+  - rm -f /etc/nginx/sites-enabled/default
+  - ln -s /etc/nginx/sites-available/api-escola /etc/nginx/sites-enabled/api-escola
+  - systemctl daemon-reload
+  - systemctl enable --now api-escola
+  - systemctl restart nginx
